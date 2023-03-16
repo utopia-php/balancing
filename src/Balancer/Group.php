@@ -19,6 +19,22 @@ class Group
         return $this;
     }
 
+    /**
+     * @return Option[]
+     */
+    public function getOptions(): array
+    {
+        $options = [];
+
+        foreach ($this->balancers as $balancer) {
+            foreach ($balancer->getOptions() as $option) {
+                $options[] = $option;
+            }
+        }
+
+        return $options;
+    }
+
     public function run(): ?Option
     {
         $option = null;
