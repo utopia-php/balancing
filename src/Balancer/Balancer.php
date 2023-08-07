@@ -32,6 +32,14 @@ class Balancer
         return $this;
     }
 
+    /**
+     * @return Option[]
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
     public function addFilter(callable $filter): self
     {
         $this->filters[] = $filter;
