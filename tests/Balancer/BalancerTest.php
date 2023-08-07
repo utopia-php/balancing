@@ -205,4 +205,43 @@ class BalancerTest extends TestCase
         $option = $group->run() ?? new Option([]);
         $this->assertEquals('lon-1', $option->getState('dataCenter'));
     }
+
+    public function testGetOptions(): void
+    {
+        $options = [
+            new Option([ 'dataCenter' => 'fra-1', 'cpu' => 91, 'online' => false ]),
+            new Option([ 'dataCenter' => 'fra-2', 'cpu' => 95, 'online' => false ]),
+            new Option([ 'dataCenter' => 'lon-1', 'cpu' => 87, 'online' => true ]),
+        ];
+
+        $balancer1 = new Balancer(new First());
+        $balancer2 = new Balancer(new First());
+
+        foreach ($options as $option) {
+            $balancer1->addOption($option);
+            $balancer2->addOption($option);
+        }
+
+        $balancerOptions = $balancer1->getOptions();
+
+        $this->assertCount(3, $balancerOptions);
+        $this->assertEquals('fra-1', $balancerOptions[0]->getState('dataCenter'));
+        $this->assertEquals('fra-2', $balancerOptions[1]->getState('dataCenter'));
+        $this->assertEquals('lon-1', $balancerOptions[2]->getState('dataCenter'));
+
+        $group = new Group();
+        $group->add($balancer1);
+        $group->add($balancer2);
+
+        $groupOptions = $group->getOptions();
+
+        $this->assertCount(6, $groupOptions);
+        $this->assertEquals('fra-1', $groupOptions[0]->getState('dataCenter'));
+        $this->assertEquals('fra-2', $groupOptions[1]->getState('dataCenter'));
+        $this->assertEquals('lon-1', $groupOptions[2]->getState('dataCenter'));
+        // Duplicates from second group also present
+        $this->assertEquals('fra-1', $groupOptions[3]->getState('dataCenter'));
+        $this->assertEquals('fra-2', $groupOptions[4]->getState('dataCenter'));
+        $this->assertEquals('lon-1', $groupOptions[5]->getState('dataCenter'));
+    }
 }
